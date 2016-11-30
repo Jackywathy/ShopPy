@@ -3,7 +3,6 @@ from tkinter import ttk
 #import appdirs
 from enum import Enum
 from tkinter.constants import *
-import tkinter.messagebox
 
 appname = "Product Checker"
 appauthor = "Jackywathy24"
@@ -291,8 +290,6 @@ class Application:
         import traceback
         def show_error(*args):
             err = traceback.format_exception(*args)
-            print(err)
-            tkinter.messagebox.showerror('Exception',err)
 
         self.root.report_callback_exception = show_error
 
