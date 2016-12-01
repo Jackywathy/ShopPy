@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ShopOS.iml" filepath="$PROJECT_DIR$/.idea/ShopOS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SQLShop.iml" filepath="$PROJECT_DIR$/.idea/SQLShop.iml" />
     </modules>
   </component>
 </project>

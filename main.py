@@ -1,13 +1,14 @@
 import tkinter
 from tkinter import ttk
-#import appdirs
+import appdirs
 from enum import Enum
 from tkinter.constants import *
 import tkinter.messagebox
 
 appname = "Product Checker"
 appauthor = "Jackywathy24"
-#appdirs.user_data_dir(appname,appauthor)
+import os
+os.chdir(appdirs.user_data_dir(appname,appauthor))
 
 
 
