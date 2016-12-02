@@ -4,11 +4,13 @@ import appdirs
 from enum import Enum
 from tkinter.constants import *
 import tkinter.messagebox
-
+from io import BytesIO
+from PIL import Image, ImageTk
+import base64
 appname = "Product Checker"
 appauthor = "Jackywathy24"
-import os
-os.chdir(appdirs.user_data_dir(appname,appauthor))
+#import os
+#os.chdir(appdirs.user_data_dir(appname,appauthor))
 
 
 
@@ -42,10 +44,10 @@ class MyBarcodePage(MyAppPage):
             barcode = event.widget.get()
             barcode_data = self.database.get_item(barcode)
             if barcode_data is not None:
-                print(barcode_data)
+                #print(barcode_data)
                 self.set_info(barcode_data)
             else:
-                print("NONE")
+                #print("NONE")
                 self.set_info(None)
 
     def set_info(self, info):
@@ -78,9 +80,11 @@ class ImageHolderUpdater:
     @Image.setter
     def Image(self, newimage):
         if newimage is None:
-            newimage = ""
-        print('newimage', newimage)
-        self._image = tkinter.PhotoImage(data=newimage)
+            self._image = None
+        else:
+            self.decoded = Image.open(BytesIO(base64.b64decode(newimage)))
+            #self.decoded.show()
+            self._image = ImageTk.PhotoImage(self.decoded) # keeping eine reference!
         self.Display.configure(image=self._image)
 
     def __init__(self, Label, Image=""):
@@ -105,7 +109,7 @@ class QueryPage(MyBarcodePage):
             self.priceVar.set('None')
         else:
             for var, data in zip([self.ItemNameVar, self.authorVar, self.ISBNVar, self.frontVar, self.backVar, self.priceVar, self.ImageHolder], infoTuple):
-                print('setting', var, 'to', data)
+                #print('setting', var, 'to', data)
                 var.set(data)
             self.priceVar.set("$"+self.priceVar.get())
 
@@ -201,18 +205,25 @@ class SQLDatabase:
 
     def get_item(self, isbn):
         print(type(isbn), print(isbn))
-        return self.c.execute("""SELECT * FROM excel WHERE isbn=(?) LIMIT 1""", (isbn,)).fetchone()
-
+        excelResponse = self.c.execute("""SELECT * FROM excel WHERE isbn=(?) LIMIT 1""", (isbn,)).fetchone()
+        if not excelResponse:
+            return self.c.execute("""SELECT * FROM basic WHERE isbn=(?) LIMIT 1""", (isbn,)).fetchone()
+        return excelResponse
     def set_qty(self, isbn, front=None, back=None):
-        assert self.c.execute("SELECT 1 FROM excel WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
+        if self.c.execute("SELECT 1 FROM excel WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone():
+            table = 'excel'
+        elif self.c.execute("SELECT 1 FROM basic WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone():
+            table = 'basic'
+        else:
+            raise Exception
         if front is not None:
-            self.c.execute("""UPDATE excel SET
+            self.c.execute("""UPDATE (?) SET
                                   front_qty=(?)
-                                  WHERE isbn=(?);""", (front,isbn))
+                                  WHERE isbn=(?);""", (table,front,isbn))
         if back is not None:
-            self.c.execute("""UPDATE excel SET
+            self.c.execute("""UPDATE (?) SET
                                   back_qty=(?)
-                                  WHERE isbn=(?);""", (back,isbn))
+                                  WHERE isbn=(?);""", (table,back,isbn))
 
 
 
@@ -292,7 +303,7 @@ class Application:
         import traceback
         def show_error(*args):
             err = traceback.format_exception(*args)
-            print(err)
+            print(''.join(err))
             tkinter.messagebox.showerror('Exception',err)
 
 
