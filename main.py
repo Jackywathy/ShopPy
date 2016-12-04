@@ -7,21 +7,14 @@ import tkinter.messagebox
 from io import BytesIO
 from PIL import Image, ImageTk
 import base64
+import sqlite3
+
 appname = "Product Checker"
 appauthor = "Jackywathy24"
 #import os
 #os.chdir(appdirs.user_data_dir(appname,appauthor))
 
-
-
-
-
-
-
-
 picturePath = ...
-
-
 
 class MyAppPage(tkinter.Frame):
     def __init__(self, parent, database, MainApp):
@@ -29,6 +22,7 @@ class MyAppPage(tkinter.Frame):
         :type database: SQLDatabase
         :type MainApp: Application
         """
+
         super().__init__(parent)
         self.database = database
         self.MainApp = MainApp
@@ -38,17 +32,20 @@ class MyAppPage(tkinter.Frame):
 class MyBarcodePage(MyAppPage):
     def queryDataBase(self, event):
         if self.MainApp.checkSpecialBarcodes(event.widget.get()):
-            print(event.widget.get())
             event.widget.doDelete = True
         else:
             barcode = event.widget.get()
             barcode_data = self.database.get_item(barcode)
-            if barcode_data is not None:
-                #print(barcode_data)
-                self.set_info(barcode_data)
+            # get data in excel&basic isbn's
+            if barcode_data is None:
+                # get data from basic #123's
+                barcode_data = self.database.get_basic_number(barcode)
+                if barcode_data is not None:
+                    self.set_info(barcode_data)
+                else:
+                    self.set_info(None)
             else:
-                #print("NONE")
-                self.set_info(None)
+                self.set_info(barcode_data)
 
     def set_info(self, info):
         raise NotImplemented
@@ -57,7 +54,12 @@ class MyBarcodePage(MyAppPage):
     def selectAll(event):
         event.widget.selection_range(0,END)
 
-
+    @staticmethod
+    def upToThree(event, length=3):
+        input = event.widget.get()
+        if len(input) > length:
+            event.widget.delete(0,END)
+            event.widget.insert(0, input[:length])
 
 class InsertPage(MyAppPage):
     def SwitchTo(self):
@@ -79,8 +81,8 @@ class ImageHolderUpdater:
         return self._image
     @Image.setter
     def Image(self, newimage):
-        if newimage is None:
-            self._image = None
+        if newimage is None or newimage.lower() == 'none':
+            self._image = errorImage
         else:
             self.decoded = Image.open(BytesIO(base64.b64decode(newimage)))
             #self.decoded.show()
@@ -102,16 +104,18 @@ class ImageHolderUpdater:
 class QueryPage(MyBarcodePage):
     def set_info(self, infoTuple):
         if infoTuple is None:
-            for i in [self.ItemNameVar, self.ISBNVar, self.authorVar]:
+            for i in [self.ItemNameVar, self.ISBNVar, self.authorVar,self.frontVar, self.backVar,self.ImageHolder]:
                 i.set("None")
-            for i in self.frontVar, self.backVar:
-                i.set("None")
-            self.priceVar.set('None')
         else:
+            id = False
+            if len(infoTuple) > 7: # if it contains an id!
+                id = infoTuple[7]
+                infoTuple = infoTuple[:7]
             for var, data in zip([self.ItemNameVar, self.authorVar, self.ISBNVar, self.frontVar, self.backVar, self.priceVar, self.ImageHolder], infoTuple):
-                #print('setting', var, 'to', data)
                 var.set(data)
             self.priceVar.set("$"+self.priceVar.get())
+            if id == False:
+                print(id, "IS ID")
 
     def SwitchTo(self):
         self.barcodeEntry.focus_set()
@@ -137,14 +141,25 @@ class QueryPage(MyBarcodePage):
             self.queryDataBase(event)
             self.selectAll(event)
 
+
+
         tkinter.Label(self, text="Barcode").grid(row=0, column=0, columnspan=8)
 
 
-
-        barcodeEntry = tkinter.Entry(self, font=("Courier", 20), justify='center')
+        entriesFrame = tkinter.Frame(self)
+        barcodeEntry = tkinter.Entry(entriesFrame, font=("Courier", 20), justify='center')
         barcodeEntry.bind("<Return>", queryAndSelect)
-        barcodeEntry.grid(row=1, column=0, columnspan=8, padx=(35,35), pady=(0,35))
+
+        barcodeEntry.pack(side=LEFT)
         self.barcodeEntry = barcodeEntry
+
+
+
+        entriesFrame.grid(row=1,column=0,columnspan=8,pady=(0,35))
+
+
+
+
         ShowBox = tkinter.Frame(self)
         self.ShowBoxText = tkinter.StringVar()
         ShowBoxLabel = tkinter.Label(ShowBox,  font=("Helvetica", 16), justify='center', textvariable=self.ShowBoxText)
@@ -176,39 +191,33 @@ class QueryPage(MyBarcodePage):
             tkinter.Label(authorGrid, text=doubleRow[0], **self.queryDescriptor).grid(**self.padStick,row=iter*2,column=0,padx=(0,100))
             tkinter.Label(authorGrid, textvariable=Vars[0], **self.queryData).grid(**self.padStick,row=iter*2+1, column=0,padx=(0,100))
 
-            tkinter.Label(authorGrid, text=doubleRow[1], **self.queryDescriptor).grid(**self.padStick,row=iter*2,column=1,padx=(100,0))
-            tkinter.Label(authorGrid, textvariable=Vars[1], **self.queryData).grid(**self.padStick,row=iter*2+1, column=1,padx=(100,0))
+            tkinter.Label(authorGrid, text=doubleRow[1], **self.queryDescriptor).grid(**self.padStick,row=iter*2,column=2,padx=(100,0))
+            tkinter.Label(authorGrid, textvariable=Vars[1], **self.queryData).grid(**self.padStick,row=iter*2+1, column=2,padx=(100,0))
 
 
-
+        ImageLabel = tkinter.Label(authorGrid, image=errorImage, width=250,height=300)
+        self.ImageHolder = ImageHolderUpdater(ImageLabel)
+        ImageLabel.grid(rowspan=4, row=0, column=1)
 
         authorGrid.pack()
-
-        ImageLabel = tkinter.Label(dataFrame)
-        self.ImageHolder = ImageHolderUpdater(ImageLabel)
-        ImageLabel.pack(fill=BOTH, expand=1)
 
 
 
         dataFrame.grid(row=2, column=0, columnspan=8, padx=(10,10), pady=(10,10), sticky=N+S+E+W)
 
         self.set_info(None)
-        print("DONES")
 
-
-import sys
-import sqlite3
 class SQLDatabase:
     def __init__(self, databaseName):
         self.connection = sqlite3.connect(databaseName)
         self.c = self.connection.cursor()
 
     def get_item(self, isbn):
-        print(type(isbn), print(isbn))
         excelResponse = self.c.execute("""SELECT * FROM excel WHERE isbn=(?) LIMIT 1""", (isbn,)).fetchone()
         if not excelResponse:
             return self.c.execute("""SELECT * FROM basic WHERE isbn=(?) LIMIT 1""", (isbn,)).fetchone()
         return excelResponse
+
     def set_qty(self, isbn, front=None, back=None):
         if self.c.execute("SELECT 1 FROM excel WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone():
             table = 'excel'
@@ -225,37 +234,12 @@ class SQLDatabase:
                                   back_qty=(?)
                                   WHERE isbn=(?);""", (table,back,isbn))
 
+    def get_basic_number(self, number):
+        return self.c.execute("""SELECT * FROM basic WHERE id=(?) LIMIT 1""", (number,)).fetchone()
 
-
-class StockPage(MyAppPage):
-    def __init__(self,parent,database,MainApp):
-        super().__init__(parent,database,MainApp)
-        '''
-        setOrAddFrame = tkinter.Frame(self)
-        setOrAddLabel = tkinter.Label(setOrAddFrame, text='Set/Increment')
-        setOrAddVar = tkinter.StringVar()
-        self.setButton = tkinter.Radiobutton(setOrAddFrame, text="Set", variable=setOrAddVar, value='set')
-        self.incButton = tkinter.Radiobutton(setOrAddFrame, text="Inc", variable=setOrAddVar,value='inc')
-        '''
-        barcodeFrame = tkinter.Frame(self)
-        barcodeLabel = tkinter.Label(barcodeFrame, text="Barcode")
-
-
-        entryBarcodeFrame = tkinter.Frame(barcodeFrame)
-
-        # TODO make this work!
-        barcodeEntry = tkinter.Entry(entryBarcodeFrame)
-
-        numEntry = tkinter.Entry(entryBarcodeFrame, width=3)
-
-        barcodeEntry.grid(row=0, column=0,columnspan=3)
-        numEntry.grid(row=0, column=3, columnspan=1)
-
-        #barcodeEntry.grid(column=0, columnspan=2)
-        barcodeLabel.pack()
-        entryBarcodeFrame.pack()
-
-        barcodeFrame.pack()
+class StockPage(MyBarcodePage):
+    def __init__(self,parent, database, MainApp):
+        super().__init__(parent, database, MainApp)
 
 
 
@@ -263,7 +247,10 @@ class StockPage(MyAppPage):
 
 
 
+
+import sys
 class Application:
+
     SpecialBarcodes = {
         "?":"query"
     }
@@ -280,6 +267,10 @@ class Application:
     def __init__(self):
         self.database = SQLDatabase("database.db")
         self.root = tkinter.Tk()
+        global errorImage
+        errorImage = ImageTk.PhotoImage(Image.open("errorcross.png"))
+
+
         #self.root.attributes("-fullscreen", True)
 
 
@@ -297,7 +288,7 @@ class Application:
         self.notebook.add(self.pages['query'], text='Query')
         self.notebook.add(self.pages['insert'], text='Insert')
         self.notebook.add(self.pages['stock'], text='Stock')
-        self.notebook.pack()
+        self.notebook.pack(pady=20,padx=20)
 
         self.notebook.bind("<<NotebookTabChanged>>", self.chooseNoteBookTarget)
         import traceback
