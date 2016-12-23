@@ -3,6 +3,7 @@ from AppBase import *
 
 class QueryPage(MyBarcodePage):
     def set_info(self, infoTuple):
+        print(infoTuple, type(infoTuple))
         if infoTuple is None:
             for i in self.vars:
                 i.set("None")
@@ -60,8 +61,10 @@ class QueryPage(MyBarcodePage):
             tkinter.Label(authorGrid, textvariable=Vars[1], **self.queryData).grid(**self.padStick,row=iter*2+1, column=2,padx=(100,0))
 
 
-        ImageLabel = tkinter.Label(authorGrid, image=ImageHolderUpdater.errorImage, width=250,height=300)
+        ImageLabel = tkinter.Label(authorGrid, relief=SUNKEN, anchor=CENTER, Image=None, width=300, height=300)
         self.ImageHolder = ImageHolderUpdater(ImageLabel)
+
+
         self.vars = [self.ItemNameVar, self.authorVar, self.ISBNVar, self.frontVar, self.backVar, self.priceVar, self.ImageHolder]
         ImageLabel.grid(rowspan=4, row=0, column=1)
 

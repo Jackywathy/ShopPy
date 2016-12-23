@@ -4,14 +4,10 @@ import sqlite3
 import main
 import tkinter.ttk as ttk
 
-def hello(i: int) -> int:...
-
-NoneInt = Optional[int]
-NoneStr = Optional[str]
-
-
-
-class MyTreeView:
-    def __init__(self, treeView: ttk.Treeview, database: main.SQLDatabase):...
-
+class Application:
+    SpecialBarcodes = {} # type: Dict[str, str]
+    def checkSpecialBarcodes(self, text:str) -> bool:...
+    def destroySelf(self, *args) -> None:...
+    def __init__(self, fullscreen:bool = False):...
+    def chooseNoteBookTarget(self, event: tkinter.Event) -> None:...
 

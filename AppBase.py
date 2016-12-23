@@ -1,25 +1,11 @@
 import tkinter
 from tkinter import ttk as ttk
+from constants import *
 from tkinter.constants import *
 from Logger import *
 import base64
 from io import BytesIO
 from PIL import Image, ImageTk
-
-
-class MyAppPage(tkinter.Frame):
-    def __init__(self, parent, database, MainApp):
-        """
-        :type database: SQLDatabase
-        :type MainApp: Application
-        """
-
-        super().__init__(parent)
-        self.database = database
-        self.MainApp = MainApp
-    def SwitchTo(self):
-        raise NotImplementedError
-
 
 class ImageHolderUpdater:
     errorImage = None
@@ -36,20 +22,13 @@ class ImageHolderUpdater:
         self.Display.configure(image=self._image)
 
     def __init__(self, Label, Image=""):
-        """
-        :type Label: tkinter.Label
-        :param data:
-        :return:
-        """
         self.Display = Label
         self._image = tkinter.PhotoImage(data=Image)
 
     def set(self, data):
         self.Image = data
 
-
-
-class MyBarcodePage(MyAppPage):
+class MyBarcodePage(tkinter.Frame):
     courier = {
         "font": ("courier", 20)
     }
@@ -70,40 +49,42 @@ class MyBarcodePage(MyAppPage):
     superSticky = {
         'sticky':"nsew"
     }
+    def SwitchTo(self):
+        """Set focus on parts on this page when the page is switched to"""
+        raise NotImplementedError
 
     def queryAndSelect(self, event):
-        ret = self.queryDataBase(event)
+        barcode = event.widget.get()
+        ret = self.queryDataBase(barcode)
         self.selectAll(event)
-        return ret
+        return ret,barcode
 
-    def queryDataBase(self, event):
+    def queryDataBase(self, barcode):
+        """Queries the database for the specified string"""
         ret = False
-        if self.MainApp.checkSpecialBarcodes(event.widget.get()):
+        if self.MainApp.checkSpecialBarcodes(barcode):
             pass
         else:
-            barcode = event.widget.get()
-            barcode_data = self.database.getIsbn(barcode)
+            ISBN = self.database.getData(barcode)
             # get data in excel&basic&basicID's isbn's
-            self.set_info(barcode_data)
-            LOG("Barcode data is",barcode_data, type(barcode_data))
-            ret = True if barcode_data is not None else False
+            self.set_info(ISBN)
+            LOG("Barcode data is",ISBN, type(ISBN))
+            ret = True if ISBN is not None else False
+        LOG("RET is", ret)
         return ret
 
     def set_info(self, info):
+        """Sets the info of the labels that need to be updated"""
         raise NotImplementedError
 
     @staticmethod
     def selectAll(event):
+        """Selects all of the given widgets entry"""
         event.widget.selection_range(0,END)
 
     @staticmethod
-    def upToThree(event, length=3):
-        input = event.widget.get()
-        if len(input) > length:
-            event.widget.delete(0,END)
-            event.widget.insert(0, input[:length])
-    @staticmethod
     def containsId(infoTuple):
+        """Returns true if provided infoTuple contains ID, e.g. has 8th element"""
         if len(infoTuple) == 8:
             return True
         elif len(infoTuple) == 7:
@@ -111,6 +92,11 @@ class MyBarcodePage(MyAppPage):
         else:
             LOG("ERROR@Resolving containsID", str(infoTuple), str(len(infoTuple)))
             raise Exception
+
+    def __init__(self, parent, database, MainApp):
+        super().__init__(parent)
+        self.database = database
+        self.MainApp = MainApp
 
 class EmptyVar:
     def set(self, item):

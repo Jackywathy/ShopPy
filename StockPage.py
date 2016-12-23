@@ -1,61 +1,14 @@
 from AppBase import *
-from Logger import *
-from collections import defaultdict
-from sqldatabase import *
-
-class MyTreeView():
-    def __init__(self, treeView, database):
-        LOG("Creating TreeView")
-        treeView.heading("#1", text="Name")
-        treeView.heading('#2', text='ISBN')
-        treeView.heading("#3", text='F')
-        treeView.heading("#4", text="B")
-
-        self.col1 = treeView.column("#1", width= 300)
-        self.col2 = treeView.column('#2', width = 70)
-        self.col3 = treeView.column("#3", width=40)
-        self.col4 = treeView.column("#4", width=40)
-        self.treeView = treeView
-        self.isbnToNode = {}
-        self.isbnToFront = defaultdict(int)
-        self.isbnToBack = defaultdict(int)
-        self.allCols = self.col1, self.col2, self.col3, self.col4
-
-        self.realData = database
-
-        self.dataBase = SQLDatabase("stockTemp.db")
-
-        try:
-            self.dataBase.execute("""CREATE TABLE stock
-                                    (ISBN text, front integer, back integer)""")
-        except:
-            pass
-
-
-    def addAmountToTree(self, isbn, front=0,back=0):
-        LOG("Adding %d to front and %d to back, itemNo: %s" % (front,back, isbn))
-        self.isbnToFront[isbn] += front
-        self.isbnToBack[isbn] += back
-        LOG("All ISBN's: front %s, back %s" % (self.isbnToFront, self.isbnToBack))
-        if isbn not in self.isbnToNode:
-            realName = self.realData.getName(isbn)[0]
-            LOG("New Node, ISBN: %s, Name: %s" % (isbn, realName))
-            self.isbnToNode[isbn] = (self.treeView.insert("",0,values=(realName, isbn, self.isbnToFront[isbn], self.isbnToBack[isbn])), realName)
-
-        else:
-            # [0] is the reference to treeView, [1] is the name.
-            LOG("Updating Line:")
-            LOG(self.treeView.item(self.isbnToNode[isbn][0]))
-            LOG("TO")
-            LOG({'name':self.isbnToNode[isbn][1], 'isbn':isbn, 'front':self.isbnToFront[isbn], 'back':self.isbnToBack[isbn]})
-            self.treeView.set(self.isbnToNode[isbn][0], column='#4', value=self.isbnToBack[isbn])
-            self.treeView.set(self.isbnToNode[isbn][0], column='#3', value=self.isbnToFront[isbn])
+from MyTreeView import *
 
 class StockPage(MyBarcodePage):
     def SwitchTo(self):
+        """Set focus on parts on this page when the page is switched to"""
         self.barcodeEntry.focus_set()
 
     def set_info(self, infoTuple):
+        """Sets the info of the variables on this page using a 7-8 length infoTuple"""
+        LOG("SETTING vars to", infoTuple)
         if infoTuple is None:
             for i in [self.nameVar, self.authorVar, self.priceVar, self.frontVar, self.backVar, self.totalVar,self.pictureVar]:
                 i.set(None)
@@ -69,18 +22,41 @@ class StockPage(MyBarcodePage):
 
             self.totalVar.set(int(self.backVar.get() if self.backVar.get().lower() != 'none' else 0) + int(self.frontVar.get() if self.frontVar.get().lower() != 'none' else 0))
 
-    def createTempDatabase(self, name="inprogress.db"):
-        self.inprogress = SQLDatabase(name)
+    def updateNoEntry(self, ISBN):
+        currB = self.button_select.get()
+        if currB == K_FRONT:
+            self.myTree.addAmountToTree(ISBN, front=1)
+            self.numberOfItemEntry.delete(0, END)
+            self.numberOfItemEntry.insert(0,self.myTree.isbnToFront[ISBN])
+        elif currB == K_BACK:
+            self.myTree.addAmountToTree(ISBN, back=1)
+            self.numberOfItemEntry.delete(0, END)
+            self.numberOfItemEntry.insert(0,self.myTree.isbnToBack[ISBN])
+        else:
+            raise Exception
+
+
+
 
     def queryAndSelect(self, event):
         valid = super().queryAndSelect(event)
         # Also set the extra entry to right amount
+        if valid[0]:
+            ISBN = self.database.getISBN(valid[1])
+            self.updateNoEntry(ISBN)
+            # update the entry
+            self.myTree.selectISBN(ISBN)
 
-        if valid:
-            self.myTree.addAmountToTree(event.widget.get(),1)
+        return valid
 
-
-    def __init__(self,parent, database, MainApp):
+    def setTreeViewFromNumberEntry(self, event):
+        if self.button_select.get() == K_FRONT:
+            self.myTree.setItemInTree(self.database.getISBN(self.barcodeEntry.get()), front=self.numberOfItemEntry.get())
+        elif self.button_select.get() == K_BACK:
+            self.myTree.setItemInTree(self.database.getISBN(self.barcodeEntry.get()), back=self.numberOfItemEntry.get())
+        else:
+            raise Exception
+    def __init__(self, parent, database, MainApp):
         super().__init__(parent, database, MainApp)
 
         tkinter.Label(self, text="Barcode").pack()
@@ -93,7 +69,18 @@ class StockPage(MyBarcodePage):
 
         self.numberOfItemEntry = tkinter.Entry(topFrame, width=3, justify='center', **self.courier)
         self.numberOfItemEntry.pack(side=LEFT)
+        self.numberOfItemEntry.bind("<Return>", self.setTreeViewFromNumberEntry)
+
+
+        self.button_select = tkinter.StringVar()
+
+        self.F_Button = tkinter.Radiobutton(topFrame, text="Front", value=K_FRONT, variable=self.button_select) # type: tkinter.Radiobutton
+        self.B_Button = tkinter.Radiobutton(topFrame, text="Back", value=K_BACK, variable=self.button_select)   # type: tkinter.Radiobutton
+        self.F_Button.select()
+        self.F_Button.pack(side=LEFT); self.B_Button.pack(side=LEFT)
+
         topFrame.pack()
+
 
 
         # DATA
@@ -120,7 +107,7 @@ class StockPage(MyBarcodePage):
         # picture and text
         pictureTextFrame = tkinter.Frame(leftFrame)
 
-        pictureLabel = tkinter.Label(pictureTextFrame,relief=SUNKEN)
+        pictureLabel = tkinter.Label(pictureTextFrame,relief=SUNKEN, anchor=CENTER, width=300, height=300, image=None)
         self.pictureVar = ImageHolderUpdater(pictureLabel)
         # title, author, isbn, front, back, price, image
         self.vars = [self.nameVar, self.authorVar, EmptyVar(), self.frontVar, self.backVar, self.priceVar, self.pictureVar]
@@ -139,7 +126,7 @@ class StockPage(MyBarcodePage):
         self.myTree = MyTreeView(ttk.Treeview(rightFrame, columns=("name", 'isbn','f','b'),show='headings'),self.database)
         self.myTree.treeView.pack(fill=BOTH, expand=True)
         # make the tree
-        tkinter.Button(rightFrame, text='eyy',command=lambda :print(self.myTree.treeView.item(self.myTree.treeView.selection()))).pack()
+        tkinter.Button(rightFrame, text='Delete',command=self.deleteSelected).pack()
 
 
 
@@ -148,8 +135,8 @@ class StockPage(MyBarcodePage):
         rightFrame.grid(row=0,column=1,sticky="nsew",padx=10,pady=10)
         mainFrame.pack()
 
-
-
+    def deleteSelected(self):
+        self.myTree.resetISBN()
 
     def makeBoxedVars(self, pictureTextFrame):
         for iter,var_name in enumerate(zip([self.priceVar, self.frontVar, self.backVar,self.totalVar],["Price", "Front", "Back", "Total"])):

@@ -1,13 +1,15 @@
 import appdirs
 import tkinter.messagebox
 import traceback
+from constants import *
+import sys
 import os
 
 
 from InsertPage import *
 from StockPage import *
 from QueryPage import *
-from constants import *
+
 
 
 SetLog("stderr.txt")
@@ -20,8 +22,6 @@ if not os.path.exists(directory):
     os.makedirs(directory)
 
 
-
-
 class Application:
     SpecialBarcodes = {
         "?":"query"
@@ -30,8 +30,10 @@ class Application:
         if text in Application.SpecialBarcodes:
             if Application.SpecialBarcodes[text] == 'query':
                 self.pages['query'].SwitchTo()
+                return True
+        return False
 
-    def destroySelf(self, event):
+    def destroySelf(self, *args):
         self.root.quit()
         sys.exit()
 

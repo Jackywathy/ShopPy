@@ -1,0 +1,16 @@
+import AppBase
+from typing import *
+import tkinter
+from sqldatabase import *
+from main import *
+
+class StockPage:
+    def SwitchTo(self) -> None:...
+    def set_info(self, infoTuple: Optional[Tuple[str]]) -> None:...
+    def queryAndSelect(self, event: tkinter.Event) -> Tuple[bool, str]:...
+    def __init__(self, parent:tkinter.Frame, database: SQLDatabase, MainApp: Application):...
+    def makeBoxedVars(self, pictureTextFrame: tkinter.Frame) -> None:...
+
+
+
+
