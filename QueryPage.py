@@ -22,12 +22,16 @@ class QueryPage(MyBarcodePage):
     def __init__(self, parent, database, MainApp):
         super().__init__(parent, database, MainApp)
         tkinter.Label(self, text="Barcode").grid(row=0, column=0, columnspan=8)
+        # TODO REMOVE
         entriesFrame = tkinter.Frame(self)
         barcodeEntry = tkinter.Entry(entriesFrame, font=("Courier", 20), justify='center')
         barcodeEntry.bind("<Return>", self.queryAndSelect)
         barcodeEntry.pack(side=LEFT)
         self.barcodeEntry = barcodeEntry
         entriesFrame.grid(row=1,column=0,columnspan=8,pady=(0,35))
+        # TODO REMOVE
+
+
         ShowBox = tkinter.Frame(self)
         self.ShowBoxText = tkinter.StringVar()
         ShowBoxLabel = tkinter.Label(ShowBox,  font=("Helvetica", 16), justify='center', textvariable=self.ShowBoxText)
@@ -35,6 +39,8 @@ class QueryPage(MyBarcodePage):
         ShowBox.grid(row=2, column=1, columnspan=6)
         # begin the dataFrame
         dataFrame = tkinter.Frame(self,borderwidth=10, highlightbackground='black')
+        # TODO REMOVE
+
         self.ItemNameVar, self.ISBNVar, self.authorVar = tkinter.StringVar(),tkinter.StringVar(), tkinter.StringVar()
         self.frontVar, self.backVar,self.priceVar = tkinter.StringVar(), tkinter.StringVar(), tkinter.StringVar()
 

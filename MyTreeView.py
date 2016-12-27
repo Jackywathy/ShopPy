@@ -1,5 +1,6 @@
 from sqldatabase import *
 from Logger import *
+from tkinter.constants import *
 from collections import defaultdict
 from constants import *
 
@@ -12,10 +13,10 @@ class MyTreeView():
         treeView.heading("#3", text='F')
         treeView.heading("#4", text="B")
 
-        treeView.column("#1", width=300)
-        treeView.column('#2', width=105)
-        treeView.column("#3", width=35)
-        treeView.column("#4", width=35)
+        treeView.column("#1", width=450)
+        treeView.column('#2', width=100)
+        treeView.column("#3", width=50, anchor=CENTER)
+        treeView.column("#4", width=50, anchor=CENTER)
         self.treeView = treeView
         self.isbnToNode = {}
         self.isbnToFront = defaultdict(int)

@@ -74,12 +74,16 @@ class StockPage(MyBarcodePage):
 
         self.button_select = tkinter.StringVar()
 
-        self.F_Button = tkinter.Radiobutton(topFrame, text="Front", value=K_FRONT, variable=self.button_select) # type: tkinter.Radiobutton
-        self.B_Button = tkinter.Radiobutton(topFrame, text="Back", value=K_BACK, variable=self.button_select)   # type: tkinter.Radiobutton
-        self.F_Button.select()
-        self.F_Button.pack(side=LEFT); self.B_Button.pack(side=LEFT)
+
 
         topFrame.pack()
+
+        buttonFrame = tkinter.Frame(self)
+        self.F_Button = tkinter.Radiobutton(buttonFrame, text="Front", value=K_FRONT, variable=self.button_select) # type: tkinter.Radiobutton
+        self.B_Button = tkinter.Radiobutton(buttonFrame, text="Back", value=K_BACK, variable=self.button_select)   # type: tkinter.Radiobutton
+        self.F_Button.select()
+        self.F_Button.pack(side=LEFT); self.B_Button.pack(side=LEFT)
+        buttonFrame.pack()
 
 
 

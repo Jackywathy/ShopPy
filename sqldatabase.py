@@ -10,17 +10,19 @@ class SQLDatabase:
 
     def getData(self, isbn):
         """Gets all data from database: (title, authors, isbn, front_qty, back_qty, price, image, optional[ID])"""
-        basic = self.c.execute("SELECT * FROM basic WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
-        excel = self.c.execute("SELECT * FROM excel WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
-        basicId = self.c.execute("SELECT * FROM basic WHERE id=(?) LIMIT 1", (isbn,)).fetchone()
-        return basic if basic is not None else excel if excel is not None else basicId
+        basic   = self.c.execute("SELECT * FROM basic WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
+        excel   = self.c.execute("SELECT * FROM excel WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
+        basicId = self.c.execute("SELECT * FROM basic WHERE id=(?)   LIMIT 1", (isbn,)).fetchone()
+        sap     = self.c.execute("SELECT * FROM sap   WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
+        return basic if basic is not None else excel if excel is not None else basicId if basicId is not None else sap
 
     def getISBN(self, IDorISBN):
         """Returns the ISBN, given ISBN or ID"""
-        basic = self.c.execute("SELECT isbn FROM basic WHERE isbn=(?) LIMIT 1", (IDorISBN,)).fetchone()
-        excel = self.c.execute("SELECT isbn FROM excel WHERE isbn=(?) LIMIT 1", (IDorISBN,)).fetchone()
-        basicId = self.c.execute("SELECT isbn FROM basic WHERE id=(?) LIMIT 1", (IDorISBN,)).fetchone()
-        return basic[0] if basic is not None else excel[0] if excel is not None else basicId[0] if basicId is not None else None
+        basic   = self.c.execute("SELECT isbn FROM basic WHERE isbn=(?) LIMIT 1", (IDorISBN,)).fetchone()
+        excel   = self.c.execute("SELECT isbn FROM excel WHERE isbn=(?) LIMIT 1", (IDorISBN,)).fetchone()
+        basicId = self.c.execute("SELECT isbn FROM basic WHERE id=(?)   LIMIT 1", (IDorISBN,)).fetchone()
+        sap     = self.c.execute("SELECT isbn FROM sap   WHERE isbn=(?) LIMIT 1", (IDorISBN,)).fetchone()
+        return basic[0] if basic is not None else excel[0] if excel is not None else basicId[0] if basicId is not None else sap[0] if sap is not None else None
 
     def set_qty(self, isbn, front=None, back=None):
         """Updates the qty of the given ISBN to front or back if supplied"""
@@ -41,10 +43,11 @@ class SQLDatabase:
 
     def getName(self, isbn):
         """Returns the title, given isbn or ID"""
-        basic = self.c.execute("SELECT title FROM basic WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
-        excel = self.c.execute("SELECT title FROM excel WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
+        basic   = self.c.execute("SELECT title FROM basic WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
+        excel   = self.c.execute("SELECT title FROM excel WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
         basicId = self.c.execute("SELECT title FROM basic WHERE id=(?) LIMIT 1", (isbn,)).fetchone()
-        return basic[0] if basic is not None else excel[0] if excel is not None else basicId[0] if basicId is not None else None
+        sap     = self.c.execute("SELECT title FROM sap   WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
+        return basic[0] if basic is not None else excel[0] if excel is not None else basicId[0] if basicId is not None else sap[0] if sap is not None else None
 
     def __del__(self):
         self.connection.close()
