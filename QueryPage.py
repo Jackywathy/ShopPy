@@ -21,32 +21,26 @@ class QueryPage(MyBarcodePage):
 
     def __init__(self, parent, database, MainApp):
         super().__init__(parent, database, MainApp)
-        tkinter.Label(self, text="Barcode").grid(row=0, column=0, columnspan=8)
-        # TODO REMOVE
-        entriesFrame = tkinter.Frame(self)
-        barcodeEntry = tkinter.Entry(entriesFrame, font=("Courier", 20), justify='center')
+        tkinter.Label(self, text="Barcode").pack()
+        barcodeEntry = tkinter.Entry(self, font=("Courier", 20), justify='center')
         barcodeEntry.bind("<Return>", self.queryAndSelect)
-        barcodeEntry.pack(side=LEFT)
+        barcodeEntry.pack()
         self.barcodeEntry = barcodeEntry
-        entriesFrame.grid(row=1,column=0,columnspan=8,pady=(0,35))
-        # TODO REMOVE
 
-
-        ShowBox = tkinter.Frame(self)
         self.ShowBoxText = tkinter.StringVar()
-        ShowBoxLabel = tkinter.Label(ShowBox,  font=("Helvetica", 16), justify='center', textvariable=self.ShowBoxText)
-        ShowBoxLabel.pack(pady=(20,30))
-        ShowBox.grid(row=2, column=1, columnspan=6)
+        ShowBoxLabel = tkinter.Label(self,  font=("Helvetica", 16), justify='center', textvariable=self.ShowBoxText)
+        ShowBoxLabel.pack()
+
         # begin the dataFrame
         dataFrame = tkinter.Frame(self,borderwidth=10, highlightbackground='black')
-        # TODO REMOVE
+
 
         self.ItemNameVar, self.ISBNVar, self.authorVar = tkinter.StringVar(),tkinter.StringVar(), tkinter.StringVar()
         self.frontVar, self.backVar,self.priceVar = tkinter.StringVar(), tkinter.StringVar(), tkinter.StringVar()
 
 
         tkinter.Label(dataFrame, text="Item Name", font = (None,18)).pack()
-        tkinter.Label(dataFrame, textvariable=self.ItemNameVar, font=(None,30),wraplength=600, width=40, height=3).pack()
+        tkinter.Label(dataFrame, textvariable=self.ItemNameVar, font=(None,30), wraplength=600, width=40, height=3).pack()
 
         tkinter.Label(dataFrame, text="RRP", font=(None,18)).pack()
         tkinter.Label(dataFrame, textvariable=self.priceVar, font=(None,25)).pack()
@@ -78,6 +72,6 @@ class QueryPage(MyBarcodePage):
 
 
 
-        dataFrame.grid(row=2, column=0, columnspan=8, padx=(10,10), pady=(10,10), sticky=N+S+E+W)
-
+        dataFrame.pack(padx=(10,10), pady=(10,10))
+        # TODO REMOVE
         self.set_info(None)
