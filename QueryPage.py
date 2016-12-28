@@ -54,6 +54,9 @@ class QueryPage(MyBarcodePage):
                      (self.frontVar, self.backVar)]
         for iter,zipedDoubleRow in enumerate(zip(labels,labelVars)):
             doubleRow, Vars = zipedDoubleRow
+            leftFrame = tkinter.Frame()
+            rightFrame = tkinter.Frame()
+            
             tkinter.Label(authorGrid, text=doubleRow[0], **self.queryDescriptor).grid(**self.padStick,row=iter*2,column=0,padx=(0,100))
             tkinter.Label(authorGrid, textvariable=Vars[0], **self.queryData).grid(**self.padStick,row=iter*2+1, column=0,padx=(0,100))
 
