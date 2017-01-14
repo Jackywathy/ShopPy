@@ -12,3 +12,12 @@ def LOG(*args,loc="main.py:",delimiter=","):
 
 def LogExit():
     currentLog.close()
+
+def RemoveImage(info):
+    if info is None:
+        return info
+    ret = []
+    for i in info:
+        if len(str(i)) < 100:
+            ret.append(i)
+    return ret

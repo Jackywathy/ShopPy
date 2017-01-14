@@ -67,7 +67,7 @@ class MyBarcodePage(tkinter.Frame):
             ISBN = self.database.getData(barcode)
             # get data in excel&basic&basicID's isbn's
             self.set_info(ISBN)
-            LOG("Barcode data is",ISBN, type(ISBN))
+            LOG("Barcode data is",RemoveImage(ISBN), type(ISBN))
             ret = True if ISBN is not None else False
         LOG("RET is", ret)
         return ret

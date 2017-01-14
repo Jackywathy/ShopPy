@@ -1,5 +1,5 @@
 import sqlite3
-
+import constants
 
 class SQLDatabase:
     openDataBases = []
@@ -62,25 +62,24 @@ class SQLDatabase:
         return self.c.execute("""SELECT * FROM stock""").fetchall()
 
     def updateItem(self, isbn, criteria, newItem, table='stock'):
-        if table == 'stock':
-            if not self.c.execute("SELECT 1 FROM stock WHERE isbn=? LIMIT 1", (isbn,)).fetchone():
-                # it doesnt exist, cerate new record
-                if criteria == 'front':
-                    self.c.execute("INSERT INTO stock (isbn, front) VALUES (?, ?)", (isbn, newItem))
-                elif criteria == 'back':
-                    self.c.execute("INSERT INTO stock (isbn, back) VALUES (?, ?)", (isbn, newItem))
-                else:
-                    raise Exception
-            else:
-                if criteria == "front":
-                    self.c.execute("UPDATE stock SET front=? WHERE isbn=?", (newItem, isbn))
-                elif criteria == 'back':
-                    self.c.execute("UPDATE stock SET back=? WHERE isbn=?", (newItem, isbn))
-                else:
-                    raise Exception
+        assert table in constants.K_TABLES
+        assert criteria in constants.K_COLUMNS
+        # stop them cheeky sql injections :D (hopefully)
+
+        if not self.c.execute("SELECT 1 FROM %s WHERE isbn=? LIMIT 1" % table, (isbn,)).fetchone():
+            # it doesnt exist, cerate new record
+            self.c.execute("INSERT INTO %s (isbn, %s) VALUES (?, ?)" % (table, criteria), (isbn, newItem))
         else:
-            raise Exception
+            self.c.execute("UPDATE %s SET %s=? WHERE isbn=?" % (table, criteria), (newItem, isbn))
+
 
     def deleteISBN(self, isbn):
         self.c.execute("DELETE FROM stock WHERE isbn=?", (isbn,))
+
+    def getTable(self, isbn):
+        basic = self.c.execute("SELECT title FROM basic WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
+        excel = self.c.execute("SELECT title FROM excel WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
+        basicId = self.c.execute("SELECT title FROM basic WHERE id=(?) LIMIT 1", (isbn,)).fetchone()
+        sap = self.c.execute("SELECT title FROM sap   WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
+        return 'basic' if basic else 'excel' if excel else 'basic' if basicId else sap
 

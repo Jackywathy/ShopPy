@@ -63,6 +63,7 @@ class MyTreeView:
             self.UpdateDataBase(isbn)
 
     def setItemInTree(self, isbn, front=None, back=None):
+        """sets the isbn front to front and isbn back to back"""
         if front is not None:
             self.isbnToFront[isbn] = front
             if isbn not in self.isbnToNode:
@@ -71,12 +72,16 @@ class MyTreeView:
             else:
                 self.treeView.set(self.isbnToNode[isbn][0], column='#3', value=self.isbnToFront[isbn])
 
+
         if back is not None:
+            self.isbnToBack[isbn] = back
             if isbn not in self.isbnToNode:
                 realName = self.master_database.getName(isbn)
                 self.isbnToNode[isbn] = (self.treeView.insert("",0,values=(realName, isbn, self.isbnToFront[isbn], self.isbnToBack[isbn])), realName)
             else:
                 self.treeView.set(self.isbnToNode[isbn][0], column='#4', value=self.isbnToBack[isbn])
+
+        self.UpdateDataBase(isbn)
 
     def selectISBN(self, ISBN):
         self.treeView.selection_set(self.isbnToNode[ISBN][0])

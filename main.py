@@ -20,6 +20,8 @@ directory = appdirs.user_data_dir(appname,appauthor)
 if not os.path.exists(directory):
     os.makedirs(directory)
 
+LOG("changing directory to", directory)
+os.chdir(directory)
 
 class Application:
     SpecialBarcodes = {

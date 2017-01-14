@@ -35,9 +35,6 @@ class StockPage(MyBarcodePage):
         else:
             raise Exception
 
-
-
-
     def queryAndSelect(self, event):
         valid = super().queryAndSelect(event)
         # Also set the extra entry to right amount
@@ -50,12 +47,17 @@ class StockPage(MyBarcodePage):
         return valid
 
     def setTreeViewFromNumberEntry(self, event):
-        if self.button_select.get() == K_FRONT:
-            self.myTree.setItemInTree(self.database.getISBN(self.barcodeEntry.get()), front=self.numberOfItemEntry.get())
-        elif self.button_select.get() == K_BACK:
-            self.myTree.setItemInTree(self.database.getISBN(self.barcodeEntry.get()), back=self.numberOfItemEntry.get())
+        currB = self.button_select.get()
+        isbn = self.database.getISBN(self.barcodeEntry.get())
+        if currB == K_FRONT:
+            self.myTree.setItemInTree(isbn, front=self.numberOfItemEntry.get())
+            self.SwitchTo()
+        elif currB == K_BACK:
+            self.myTree.setItemInTree(isbn, back=self.numberOfItemEntry.get())
+            self.SwitchTo()
         else:
             raise Exception
+
     def __init__(self, parent, database, MainApp):
         super().__init__(parent, database, MainApp)
 
@@ -129,11 +131,11 @@ class StockPage(MyBarcodePage):
         rightFrame = tkinter.Frame(mainFrame)
         self.myTree = MyTreeView(ttk.Treeview(rightFrame, columns=("name", 'isbn','f','b'),show='headings'),self.database)
         self.myTree.treeView.pack(fill=BOTH, expand=True)
-        # make the tree
-        tkinter.Button(rightFrame, text='Delete',command=self.deleteSelected).pack()
-        tkinter.Button(rightFrame, text='Write Changes',command=self.writeChanges).pack()
-
-
+        # make the buttons under the tree
+        writeFrame = tkinter.Frame(rightFrame)
+        tkinter.Button(writeFrame, text='Delete'       , command=self.deleteSelected, padx=10, pady=10).grid(row=0, column=0)
+        tkinter.Button(writeFrame, text='Write Changes', command=self.writeChanges  , padx=10, pady=10).grid(row=0, column=1)
+        writeFrame.pack()
 
 
         leftFrame.grid(row=0,column=0,sticky="nsew",padx=10,pady=10)
@@ -153,5 +155,25 @@ class StockPage(MyBarcodePage):
             priceFrame.grid(row=i,column=2)
 
     def writeChanges(self):
-        for i in self.myTree:
-            print(i)
+        currB = self.button_select.get()
+        if currB == K_BACK:
+            for i in self.myTree:
+                barcode, front, back = i
+                table = self.database.getTable(barcode)
+                self.database.updateItem(barcode, 'back_qty', back, table=table)
+                self.myTree.deleteItem(barcode)
+            # sets the info to the barcode given in the barcode entry
+            self.set_info(self.database.getData(self.barcodeEntry.get()))
+
+        elif currB == K_FRONT:
+            for i in self.myTree:
+                barcode, front, back = i
+                table = self.database.getTable(barcode)
+                self.database.updateItem(barcode, 'front_qty', front, table=table)
+                self.myTree.deleteItem(barcode)
+            # sets the info to the barcode given in the barcode entry
+            self.set_info(self.database.getData(self.barcodeEntry.get()))
+
+        else:
+            raise Exception
+

@@ -1,5 +1,5 @@
 import sqlite3
-from typing import *
+from BaseTyping import *
 
 class SQLDatabase:
     openDataBases = [] # type: List[type(sqlite3.connect('1'))]
