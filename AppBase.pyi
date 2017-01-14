@@ -1,11 +1,10 @@
+from BaseTyping import *
+from main import Application, SQLDatabase
 import tkinter
-from main import *
 
 class ImageHolderUpdater:
     errorImage = None # type: Optional[ImageTk]
-    @overload
     def Image(self) -> str:...
-    @overload
     def Image(self, newimage: Optional[str]) -> None:...
     def __init__(self, Label: tkinter.Label, Image: str = ""):...
     def set(self, data:str) -> None:...
@@ -30,4 +29,4 @@ class MyBarcodePage(tkinter.Frame):
     superSticky = {} # type: Dict[str, Union[Tuple, str]]
 
 class EmptyVar:
-    def set(self, item:Optional[str]): -> None...
+    def set(self, item:Optional[str]) -> None:...

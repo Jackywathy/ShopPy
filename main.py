@@ -1,23 +1,22 @@
-import appdirs
 import tkinter.messagebox
-import traceback
-from constants import *
-import sys
-import os
 
-
-from InsertPage import *
-from StockPage import *
-from QueryPage import *
-
+from InsertPage import InsertPage
+from StockPage import StockPage
+from QueryPage import QueryPage
+from AppBase import *
+import os, sys
+import appdirs
+import tkinter.ttk as ttk
+from sqldatabase import SQLDatabase
+from constants import K_ERRORBASE64
 
 
 SetLog("stderr.txt")
 
-
 appname = "Product Checker"
 appauthor = "Jackywathy24"
 directory = appdirs.user_data_dir(appname,appauthor)
+
 if not os.path.exists(directory):
     os.makedirs(directory)
 
@@ -42,7 +41,8 @@ class Application:
         self.database = SQLDatabase("database.db")
         LOG("Database")
         self.root = tkinter.Tk()
-        ImageHolderUpdater.errorImage = ImageTk.PhotoImage(Image.open(K_ERRORIMAGE))
+        # set the errorImage
+        ImageHolderUpdater.errorImage = ImageTk.PhotoImage(Image.open(BytesIO(base64.b64decode(K_ERRORBASE64))))
 
         if fullscreen:
             self.root.attributes("-fullscreen", True)
@@ -68,6 +68,7 @@ class Application:
         self.root.bind("<Alt-F4>", lambda x: self.destroySelf(x))
         self.notebook.bind("<<NotebookTabChanged>>", self.chooseNoteBookTarget)
         def show_error(*args):
+            import traceback
             err = traceback.format_exception(*args)
             print(''.join(err))
             tkinter.messagebox.showerror('Exception',err)

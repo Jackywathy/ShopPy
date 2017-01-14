@@ -3,13 +3,15 @@ from AppBase import *
 
 class QueryPage(MyBarcodePage):
     def set_info(self, infoTuple):
-        print(infoTuple, type(infoTuple))
+        LOG("Setting info for", infoTuple)
         if infoTuple is None:
+            LOG("InfoTuple is None")
             for i in self.vars:
                 i.set("None")
         else:
             if self.containsId(infoTuple): # if it contains an id!
                 id = infoTuple[7]
+                LOG("InforTuple contains ID!", id)
                 infoTuple = infoTuple[:7]
 
             for var, data in zip(self.vars, infoTuple):
@@ -21,12 +23,13 @@ class QueryPage(MyBarcodePage):
 
     def __init__(self, parent, database, MainApp):
         super().__init__(parent, database, MainApp)
+        # barcode label
         tkinter.Label(self, text="Barcode").pack()
-        barcodeEntry = tkinter.Entry(self, font=("Courier", 20), justify='center')
-        barcodeEntry.bind("<Return>", self.queryAndSelect)
-        barcodeEntry.pack()
-        self.barcodeEntry = barcodeEntry
-
+        # barcode Entry
+        self.barcodeEntry = tkinter.Entry(self, font=("Courier", 20), justify='center')
+        self.barcodeEntry.bind("<Return>", self.queryAndSelect)
+        self.barcodeEntry.pack()
+        # item name
         self.ShowBoxText = tkinter.StringVar()
         ShowBoxLabel = tkinter.Label(self,  font=("Helvetica", 16), justify='center', textvariable=self.ShowBoxText)
         ShowBoxLabel.pack()

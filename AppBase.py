@@ -1,7 +1,6 @@
 import tkinter
-from tkinter import ttk as ttk
-from constants import *
 from tkinter.constants import *
+import tkinter.ttk as ttk
 from Logger import *
 import base64
 from io import BytesIO
@@ -17,13 +16,13 @@ class ImageHolderUpdater:
         if newimage is None or newimage.lower() == 'none':
             self._image = self.errorImage
         else:
-            self.decoded = Image.open(BytesIO(base64.b64decode(newimage)))
-            self._image = ImageTk.PhotoImage(self.decoded) # keeping eine reference!
+            decoded = Image.open(BytesIO(base64.b64decode(newimage)))
+            self._image = ImageTk.PhotoImage(decoded) # keeping eine reference!
         self.Display.configure(image=self._image)
 
-    def __init__(self, Label, Image=""):
+    def __init__(self, Label, image=""):
         self.Display = Label
-        self._image = tkinter.PhotoImage(data=Image)
+        self._image = tkinter.PhotoImage(data=image)
 
     def set(self, data):
         self.Image = data

@@ -131,6 +131,7 @@ class StockPage(MyBarcodePage):
         self.myTree.treeView.pack(fill=BOTH, expand=True)
         # make the tree
         tkinter.Button(rightFrame, text='Delete',command=self.deleteSelected).pack()
+        tkinter.Button(rightFrame, text='Write Changes',command=self.writeChanges).pack()
 
 
 
@@ -143,10 +144,14 @@ class StockPage(MyBarcodePage):
         self.myTree.resetISBN()
 
     def makeBoxedVars(self, pictureTextFrame):
-        for iter,var_name in enumerate(zip([self.priceVar, self.frontVar, self.backVar,self.totalVar],["Price", "Front", "Back", "Total"])):
+        for i,var_name in enumerate(zip([self.priceVar, self.frontVar, self.backVar,self.totalVar],["Price", "Front", "Back", "Total"])):
             var, name = var_name
             # price, front, back, total
             priceFrame = tkinter.Frame(pictureTextFrame)
             tkinter.Label(priceFrame,text=name, **self.queryDescriptor).pack()
             tkinter.Label(priceFrame,textvariable=var, **self.queryData).pack()
-            priceFrame.grid(row=iter,column=2)
+            priceFrame.grid(row=i,column=2)
+
+    def writeChanges(self):
+        for i in self.myTree:
+            print(i)

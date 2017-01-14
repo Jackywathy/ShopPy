@@ -1,6 +1,6 @@
-from AppBase import *
-from sqldatabase import *
-from main import *
+from main import Application, MyBarcodePage, SQLDatabase
+import tkinter
+from BaseTyping import *
 
 class InsertPage(MyBarcodePage):
     def SwitchTo(self) -> None:...

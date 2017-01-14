@@ -1,6 +1,6 @@
+import datetime
 currentLog = None
 dolog = True
-import datetime
 def SetLog(name):
     global currentLog
     currentLog = open(name, 'a+')
