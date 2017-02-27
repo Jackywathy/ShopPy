@@ -4,10 +4,18 @@ A little basic gui written in python that is able to write to and read from a sq
 # Running
 - clone the repo using:    "git clone https://github.com/Jackywathy/ShopPy"
 - navigate to directory:   "cd ShopPy"
-- asdf
+- run the python:          "python(3) main.py"
+- a gui *should* pop up 
 
 ## Functionality
-- Can query (display isbn, 
+- Can query (display isbn, book number etc) 
+- Can do stock (a little glitchy but somewhat works)
+
+## TODO
+- finish insert
+- make stock more intuitive
+- make a checkout mode
+
 # License
 MIT license, aka do whatever, but dont blame me if it kills your exisiting databases (shouldnt tho)
 
