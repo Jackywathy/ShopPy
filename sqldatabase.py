@@ -83,3 +83,23 @@ class SQLDatabase:
         sap = self.c.execute("SELECT title FROM sap   WHERE isbn=(?) LIMIT 1", (isbn,)).fetchone()
         return 'basic' if basic else 'excel' if excel else 'basic' if basicId else sap
 
+    def export(self, fname='out.xlsx'):
+        import openpyxl
+        import openpyxl.cell as pycell
+        wb = openpyxl.Workbook()
+        sheet = wb.get_active_sheet()
+        for i,name in enumerate(("title", 'authors', 'isbn', 'front', 'back', 'price')):
+            sheet[pycell.get_column_letter(i+1)+"1"] = name
+        for row,data in enumerate(self.c.execute("SELECT * FROM excel").fetchall()):
+            for column, cell in enumerate(data):
+                if cell is None:
+                    cell = 0
+                if len(str(cell)) < 1000:
+                    print(pycell.get_column_letter(column+1) + str(row + 2))
+                    sheet[pycell.get_column_letter(column+1)+str(row+2)] = cell
+
+        wb.save(fname)
+
+
+
+

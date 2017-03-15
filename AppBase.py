@@ -94,7 +94,7 @@ class MyBarcodePage(tkinter.Frame):
 
     def __init__(self, parent, database, MainApp):
         super().__init__(parent)
-        self.database = database
+        self.database = database #type: SQLDatabase
         self.MainApp = MainApp
 
 class EmptyVar:

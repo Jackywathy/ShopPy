@@ -57,14 +57,20 @@ class QueryPage(MyBarcodePage):
                      (self.frontVar, self.backVar)]
         for iter,zipedDoubleRow in enumerate(zip(labels,labelVars)):
             doubleRow, Vars = zipedDoubleRow
-            leftFrame = tkinter.Frame()
-            rightFrame = tkinter.Frame()
-            
-            tkinter.Label(authorGrid, text=doubleRow[0], **self.queryDescriptor).grid(**self.padStick,row=iter*2,column=0,padx=(0,100))
-            tkinter.Label(authorGrid, textvariable=Vars[0], **self.queryData).grid(**self.padStick,row=iter*2+1, column=0,padx=(0,100))
+            leftFrame  = tkinter.Frame(authorGrid)
+            rightFrame = tkinter.Frame(authorGrid)
 
-            tkinter.Label(authorGrid, text=doubleRow[1], **self.queryDescriptor).grid(**self.padStick,row=iter*2,column=2,padx=(100,0))
-            tkinter.Label(authorGrid, textvariable=Vars[1], **self.queryData).grid(**self.padStick,row=iter*2+1, column=2,padx=(100,0))
+            # left
+            tkinter.Label(leftFrame, text=doubleRow[0], **self.queryDescriptor).pack()
+            tkinter.Label(leftFrame, textvariable=Vars[0], **self.queryData).pack()
+
+            # right
+            tkinter.Label(rightFrame, text=doubleRow[1], **self.queryDescriptor).pack()
+            tkinter.Label(rightFrame, textvariable=Vars[1], **self.queryData).pack()
+            print(doubleRow[1])
+    
+            leftFrame.grid(**self.padStick,row=iter   , column=0, padx=(0,100))
+            rightFrame.grid(**self.padStick,row=iter, column=2, padx=(100,0))
 
 
         ImageLabel = tkinter.Label(authorGrid, relief=SUNKEN, anchor=CENTER, Image=None, width=300, height=300)

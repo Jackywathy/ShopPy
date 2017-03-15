@@ -21,7 +21,7 @@ if not os.path.exists(directory):
     os.makedirs(directory)
 
 LOG("changing directory to", directory)
-os.chdir(directory)
+#os.chdir(directory)
 
 class Application:
     SpecialBarcodes = {
