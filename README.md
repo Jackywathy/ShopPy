@@ -17,5 +17,5 @@ A little basic gui written in python that is able to write to and read from a sq
 - make a checkout mode
 
 # License
-MIT license, aka do whatever, but dont blame me if it kills your exisiting databases (shouldnt tho)
+MIT license
 
